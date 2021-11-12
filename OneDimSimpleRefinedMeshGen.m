@@ -13,7 +13,7 @@ function [mesh] = OneDimSimpleRefinedMeshGen(xmin,xmax,Ne)
     
     if(mesh.ngn > 1)
         for j=2:(mesh.ngn-1)
-          mesh.nvec(j) = (xmax - xmin)/(2^(j-1)) + mesh.nvec(j-1)
+          mesh.nvec(j) = (xmax - xmin)/(2^(j-1)) + mesh.nvec(j-1);
         end
     end
     %mesh.nvec = xmin:dx:xmax;
