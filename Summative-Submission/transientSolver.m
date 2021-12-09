@@ -24,9 +24,15 @@ f = @(x,t) 0;
 ICs = @(x) 0;
 % Create the first ccurr vector corresponding to the initial conditions
 ccurr = initialConditions(ICs,mesh);
-
 % Define cnext as a column vector of zeros
 cnext = zeros(mesh.ngn,1);
+
+% Define the boundary condition values as functions of time
+BC0 = @(t) 0;
+BC1 = @(t) 0;
+% Declare the types of the two boundaries ("Neumann" or "Dirichlet")
+BC0type = "Neumann";
+BC1type = "Dirichlet";
 
 % Initialise the time variable
 t = 0;
@@ -51,11 +57,13 @@ for tstep = 1:N
     gV = P * ccurr;
     
     % Create the global vector ( dt * ( theta * Fnext + (1-theta)*Fcurr ) )
-    gV = globalVector();
+    Fcurr = globalSourceVector(f,mesh,t);
+    Fnext = globalSourceVector(f,mesh,t+dt);
+    gV = gV + dt*(theta*Fnext + (1-theta)*Fcurr);
 
     % If Neumann add to the gvec dt*(theta*NBCnext + (1-theta)*NBCcurr) 
     % Apply Dirichlet BCs in normal way 
-    [gV,gM] = boundaryConditions();
+    [gV,gM] = boundaryConditions(BC0,BC0type,BC1,BC1type,gM,gV,mesh,t,dt,theta);
 
     % Solve final matrix system 
     cnext = gM \ gV;

@@ -26,4 +26,5 @@ for e = 1:mesh.ne
     gStiffMatrix(e:e+1,e:e+1) = gStiffMatrix(e:e+1,e:e+1) - lReacMatrix;
     
 end
+end
 
