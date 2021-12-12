@@ -29,7 +29,7 @@ if bc0type == "Neumann"
 elseif bc0type == "Dirichlet"
     
     % Change the first position in the global vector
-    vector(1,1) = bc0val;
+    vector(1,1) = bc0val(t);
     % Change the first row of the global matrix
     matrix(1,1) = 1;
     matrix(1,2:mesh.ngn) = zeros(1,mesh.ngn-1);
@@ -47,7 +47,7 @@ if bc1type == "Neumann"
 elseif bc1type == "Dirichlet"
     
     % Change the last position in the global vector
-    vector(mesh.ngn,1) = bc1val;
+    vector(mesh.ngn,1) = bc1val(t);
     % Change the last row of the global matrix
     matrix(mesh.ngn,mesh.ngn) = 1;
     matrix(mesh.ngn,1:mesh.ngn-1) = zeros(1,mesh.ngn-1);

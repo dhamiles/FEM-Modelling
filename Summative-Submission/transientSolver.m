@@ -7,15 +7,15 @@ ne = 10;
 mesh = OneDimLinearMeshGen(xmin,xmax,ne);
 
 % Initialise theta, detla t and total time 
-theta = 0;
+theta = 1;
 dt = 0.1;
-N = 10;
+N = 100;
 
 % Define material coefficients (D, lambda, f)
 % These are currently being defined as function in x and t
 % If you wish for a constant value, D = @(x,t) 5; for example
 % For a varying value, use the format D = @(x,t) (x^2)*t + 3; for example
-D = @(x,t) 0;
+D = @(x,t) 1;
 lambda = @(x,t) 0;
 f = @(x,t) 0;
 
@@ -29,13 +29,19 @@ cnext = zeros(mesh.ngn,1);
 
 % Define the boundary condition values as functions of time
 BC0 = @(t) 0;
-BC1 = @(t) 0;
+BC1 = @(t) 1;
 % Declare the types of the two boundaries ("Neumann" or "Dirichlet")
-BC0type = "Neumann";
+BC0type = "Dirichlet";
 BC1type = "Dirichlet";
 
 % Initialise the time variable
 t = 0;
+tvec = zeros(N+1,1);
+
+% Initialise the solution matrix 
+solution = zeros(mesh.ngn,N+1);
+% Add the first solution into the solution matrix 
+solution(1:mesh.ngn,1) = ccurr;
 
 % Loop over all the time steps 
 for tstep = 1:N
@@ -63,7 +69,7 @@ for tstep = 1:N
 
     % If Neumann add to the gvec dt*(theta*NBCnext + (1-theta)*NBCcurr) 
     % Apply Dirichlet BCs in normal way 
-    [gV,gM] = boundaryConditions(BC0,BC0type,BC1,BC1type,gM,gV,mesh,t,dt,theta);
+    [gM,gV] = boundaryConditions(BC0,BC0type,BC1,BC1type,gM,gV,mesh,t,dt,theta);
 
     % Solve final matrix system 
     cnext = gM \ gV;
@@ -71,10 +77,21 @@ for tstep = 1:N
     % Set new cnext to ccurr
     ccurr = cnext;
 
+    % Add ccurr into the solution matrix
+    solution(1:mesh.ngn,tstep+1) = ccurr;
+
+    % Add the time to tvec
+    tvec(tstep+1,1) = t;
     % Iterate the time step
     t = t + dt;
 
 end
 
-% Plot the solution
+% Surface plot of the solution
+surf(mesh.nvec,tvec,(solution)');
+hold on
+xlabel("x");
+ylabel("time");
+zlabel("Solution");
+hold off
 

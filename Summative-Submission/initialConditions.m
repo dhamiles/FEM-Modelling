@@ -9,7 +9,7 @@ ICvector = zeros(mesh.ngn,1);
 for n = 1:mesh.ngn
     
     % Set the value of the IC vector at node n as per the IC equation
-    ICvector(n) = ICs(mesh.nvec(n));
+    ICvector(n,1) = ICs(mesh.nvec(n));
 
 end
 

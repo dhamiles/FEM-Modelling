@@ -1,7 +1,8 @@
-function out = IntegrationGQ(N,func,gq)
+function out = IntegrationGQ(func,gq)
 %INTEGRATIONGQ Calculates the definite integral of a function
-%   
-%
+
+% Set the value of N
+N = gq.npts;
 
 % Initialise a summing variable sum to 0
 sum = 0;
