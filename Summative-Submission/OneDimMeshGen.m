@@ -40,7 +40,7 @@ elseif order==2
 
         %set spatial positions of nodes
         mesh.elem(i).x(1) = xmin + (i-1)*dx;
-        mesh.elem(i).x(2) = xmin + i*(dx/2);
+        mesh.elem(i).x(2) = xmin + ((i-1)*dx)+(dx/2);
         mesh.elem(i).x(3) = xmin + i*dx;
 
         %set global IDs of the nodes

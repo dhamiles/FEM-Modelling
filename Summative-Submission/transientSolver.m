@@ -69,7 +69,8 @@ for tstep = 1:N
 
     % If Neumann add to the gvec dt*(theta*NBCnext + (1-theta)*NBCcurr) 
     % Apply Dirichlet BCs in normal way 
-    [gM,gV] = boundaryConditions(BC0,BC0type,BC1,BC1type,gM,gV,mesh,t,dt,theta);
+    [gM,gV] = boundaryConditions(BC0,BC0type,BC1,BC1type,gM,gV,mesh,t,dt...
+                                 ,theta);
 
     % Solve final matrix system 
     cnext = gM \ gV;

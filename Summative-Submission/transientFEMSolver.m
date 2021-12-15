@@ -1,5 +1,5 @@
 function [solution,tvec,xvec] = transientFEMSolver(titles,mesh,theta,dt,...
-                               time,D,lambda,f,ICs,BC0,BC0type,BC1,BC1type)
+    endtime,Df,lambdaf,ff,ICs,BC0,BC0type,BC1,BC1type)
 %TRANSIENTFEMSOLVER solves a transient, 1D FEM problem in 1 Dimension
 %   This function returns the numerical solution for a diffusion-reaction
 %   equation, in a transient, 1D case. This function takes in the following
@@ -14,9 +14,9 @@ function [solution,tvec,xvec] = transientFEMSolver(titles,mesh,theta,dt,...
 %                   -theta=1: Backward Euler
 %       -dt: the size of the time step for the transient problem
 %       -time: the total time over which the problem should be solved
-%       -D: the diffusion term, as a function handle (D = @(x,t))
-%       -lambda: the reaction term, as function handle (lamdba = @(x,t))
-%       -f: the source term, as a function handle (f = @(x,t))
+%       -Df: the diffusion term, as a function handle (D = @(x,t))
+%       -lambdaf: the reaction term, as function handle (lamdba = @(x,t))
+%       -ff: the source term, as a function handle (f = @(x,t))
 %       -ICs: the initial system conditions, as a function handle in x
 %             (ICs = f(x))
 %       -BC0: the boundary conditions at the left most x position as a 
@@ -41,8 +41,8 @@ ccurr = initialConditions(ICs,mesh);
 cnext = zeros(mesh.ngn,1);
 
 % Initialise the time variable and number of time steps
-t = 0;
-N = (time/dt);
+time = 0;
+N = (endtime/dt);
 tvec = zeros(N+1,1);
 
 % Set the output xvec
@@ -58,12 +58,18 @@ solution(1:mesh.ngn,1) = ccurr;
 
 % Loop over all the time steps 
 for tstep = 1:N
+    
+    % Set all the material coefficients at this timestep
+    D = @(x) Df(x,time);
+    lambda = @(x) lambdaf(x,time);
+    ffcurr = @(x) ff(x,time);
+    ffnext = @(x) ff(x,time+dt);
 
     % Create the global mass matrix
-    M = globalMassMatrix(mesh);
+    M = globalMassMatrix(mesh,order);
 
     % Create the global stiffness matrix 
-    K = globalStiffnessMatrix(D,lambda,mesh,t);
+    K = globalStiffnessMatrix(D,lambda,mesh,order);
 
     % Create global matrix ( M + theta * dt * K )
     gM = M + (theta*dt*K);
@@ -76,14 +82,14 @@ for tstep = 1:N
     gV = P * ccurr;
     
     % Create the global vector ( dt * ( theta * Fnext + (1-theta)*Fcurr ) )
-    Fcurr = globalSourceVector(f,mesh,t);
-    Fnext = globalSourceVector(f,mesh,t+dt);
+    Fcurr = globalSourceVector(ffcurr,mesh,order);
+    Fnext = globalSourceVector(ffnext,mesh,order);
     gV = gV + dt*(theta*Fnext + (1-theta)*Fcurr);
 
     % If Neumann add to the gvec dt*(theta*NBCnext + (1-theta)*NBCcurr) 
     % Apply Dirichlet BCs in normal way 
-    [gM,gV] = boundaryConditions(BC0,BC0type,BC1,BC1type,gM,gV,mesh,t,...
-                                dt,theta);
+    [gM,gV] = boundaryConditions(BC0,BC0type,BC1,BC1type,gM,gV,mesh,...
+                                    time,dt,theta);
 
     % Solve final matrix system 
     cnext = gM \ gV;
@@ -95,9 +101,9 @@ for tstep = 1:N
     solution(1:mesh.ngn,tstep+1) = ccurr;
 
     % Iterate the time step
-    t = t + dt;
+    time = time + dt;
     % Add the time to tvec
-    tvec(tstep+1,1) = t;
+    tvec(tstep+1,1) = time;
 
 end
 

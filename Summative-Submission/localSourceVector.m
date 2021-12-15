@@ -1,29 +1,30 @@
-function lSourceVect = localSourceVector(f,e,mesh)
+function lSourceVect = localSourceVector(f,e,mesh,order)
 %LOCALSOURCEVECTOR Summary of this function goes here
 %   Detailed explanation goes here
 
 % Declare the order of the GQ scheme
-N = 2;
+if order==1
+    N = 2;
+elseif order==2
+    N = 3;
+end
+
 % Set J to a simple variable to make the code more readable
 J = mesh.elem(e).J;
-
 % Create a Gaussian Quadrature scheme to integrate basis functions
 gq = CreateGQScheme(N);
 
-% Create functions in zeta for psi0 and psi1
-psi0 = @(zeta) (1-zeta)/2;
-psi1 = @(zeta) (1+zeta)/2;
+% Create placeholder matrix of zeros
+lSourceVect = zeros(order+1,1);
 
-% Decare a function in x for each element
-f0 = @(zeta) psi0(zeta)*f*J;
-f1 = @(zeta) psi1(zeta)*f*J;
-
-% Integrate the functions
-Int0 = IntegrationGQ(f0,gq);
-Int1 = IntegrationGQ(f1,gq);
-
-% Return the column vector
-lSourceVect = [Int0; Int1];
+% Loop through rows of matrix
+for n = 0:order
+    % Create a 'function' in zeta to integrate with GQ
+    f = @(zeta) evalField(mesh,f,e,zeta,order)*...
+                evalBasis(n,zeta,order)*...
+                J;
+    lSourceVect(n+1,1) = IntegrationGQ(f,gq);
+end
 
 end
 

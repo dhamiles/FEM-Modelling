@@ -19,13 +19,14 @@ BC1type = "Dirichlet"; % Declare the RHS boundary condition type
 % Time and mesh parameters
 xmin = 0; % The lower x bound of the domain to solve over
 xmax = 1; % The upper x bound of the domain to solve over
-ne = 10; % The  number  of elements in the 1D mesh
-dt = 0.05; % The size of the transient time steps
+ne = 8; % The  number  of elements in the 1D mesh
+dt = 0.005; % The size of the transient time steps
 time = 1; % The time over which the solution should be determined
 theta = 1; % Declare which time stepping scheme to be used
+order = 1; % Declare whether linear or quadratic Lagrange to be used
 
 % Solve this problem
-mesh = OneDimMeshGen(xmin,xmax,ne,1); % Generate the mesh
+mesh = OneDimMeshGen(xmin,xmax,ne,order); % Generate the mesh
 [solution,tvec,xvec] = transientFEMSolver(titlestr,mesh,theta,dt,time, ...
     D,lambda,f,ICs,BC0,BC0type,BC1,BC1type);
 
@@ -34,7 +35,7 @@ figure;
 hold on
 treq = [0.05,0.1,0.3,1.0];
 selectivePlot(treq,xvec,solution,dt,titlestr,"n","X","t");
-% Plot the analytical solution
+% Create a matrix containing the analytical solution
 astep = 0.01;
 atvec = 0:astep:1;
 axvec = 0:astep:1;
@@ -50,8 +51,8 @@ hold off
 % Plot the analytical and numerical at x=0.8
 figure;
 hold on
-xreq=[0.8];
-xstep=(xmax-xmin)/ne;
+xreq=[0.1,0.5,0.9];
+xstep=(xmax-xmin)/(order*ne);
 selectivePlot(xreq,tvec,(solution)',xstep,titlestr,"n","Time [s]","x");
 selectivePlot(xreq,atvec,(asolution)',astep,titlestr,"a","Time [s]","x");
 hold off

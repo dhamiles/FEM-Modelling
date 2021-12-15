@@ -19,14 +19,14 @@ for i = 1:length(reqvals)
     name = strcat(unit,"=",num2str(reqvals(i))," [",tag,"]");
     % If numerical make line solid, if analytical make line dashed
     if tag=="n"
-        plot(xaxis,solution(:,index),DisplayName=name,LineStyle='-');
+        plot(xaxis,solution(:,index),'DisplayName',name,'LineStyle','-');
     elseif tag=="a"
-        plot(xaxis,solution(:,index),DisplayName=name,LineStyle='--');
+        plot(xaxis,solution(:,index),'DisplayName',name,'LineStyle','--');
     end
     hold on
 end
 
-legend('show',Location='best');
+legend('show','Location','best');
 xlabel(xlab)
 ylabel('Solution')
 title(titles)

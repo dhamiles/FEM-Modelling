@@ -1,4 +1,4 @@
-function gStiffMatrix = globalStiffnessMatrix(Dfunc,lambdafunc,mesh,t)
+function gStiffMatrix = globalStiffnessMatrix(Dfunc,lambdafunc,mesh,order)
 %GLOBALSTIFFNESSMATRIX Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -6,24 +6,25 @@ function gStiffMatrix = globalStiffnessMatrix(Dfunc,lambdafunc,mesh,t)
 gStiffMatrix = zeros(mesh.ngn);
 
 % Loop through all elements in the mesh
-for e = 1:mesh.ne
-    
-    % Set the current space coordinate (x)
-    x = mesh.nvec(e);
+for i = 1:mesh.ne
 
+    e = 1+(i-1)*order; % Set the coord of the top left of matrix
+    
     % Set the values of D and lambda at the current time and space coords
-    D = Dfunc(x,t);
-    lambda = lambdafunc(x,t);
+    D = @(x) Dfunc(x);
+    lambda = @(x) lambdafunc(x);
 
     % Call the local diffusion matrix function
-    lDiffMatrix = localDiffusionMatrix(D,e,mesh);
+    lDiffMatrix = localDiffusionMatrix(D,i,mesh,order);
     % Add the matrix into the correct position of the global matrix
-    gStiffMatrix(e:e+1,e:e+1) = gStiffMatrix(e:e+1,e:e+1) + lDiffMatrix;
+    gStiffMatrix(e:e+order,e:e+order) = gStiffMatrix(e:e+order,e:e+order)...
+                                        + lDiffMatrix;
 
     % Call the local reaction matrix function
-    lReacMatrix = localReactMatrix(lambda,e,mesh);
+    lReacMatrix = localReactMatrix(lambda,i,mesh,order);
     % Add the matrix into the correct position of the global matrix
-    gStiffMatrix(e:e+1,e:e+1) = gStiffMatrix(e:e+1,e:e+1) - lReacMatrix;
+    gStiffMatrix(e:e+order,e:e+order) = gStiffMatrix(e:e+order,e:e+order)...
+                                        - lReacMatrix;
     
 end
 end
